@@ -1,0 +1,65 @@
+@page "/personagem"
+@inject BlazzorDbzPersonagem.Services.DbzService DbzService
+
+<h3>🔍 Buscar Personagem Dragon Ball</h3>
+
+<div class="mb-3" style="max-width:260px;">
+    <label for="idPersonagem" class="form-label">ID do Personagem:</label>
+    <input type="number" id="idPersonagem" class="form-control" @bind="personagemId" min="1" />
+</div>
+
+<button class="btn btn-primary" @onclick="BuscarPersonagem">Buscar</button>
+
+@if (loading)
+{
+    <p>Carregando...</p>
+}
+else if (personagem != null)
+{
+    <div class="mt-4 p-3 border rounded" style="max-width:600px;">
+        <h4>@personagem.Name</h4>
+        <p><strong>🌍 Planeta:</strong> @personagem.Planet</p>
+
+        <h5>⚡ Transformações:</h5>
+        @if (personagem.Transformations != null && personagem.Transformations.Any())
+        {
+            <ul>
+                @foreach (var t in personagem.Transformations)
+                {
+                    <li>@t</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Sem transformações conhecidas.</p>
+        }
+    </div>
+}
+else if (erro)
+{
+    <p class="text-danger">Personagem não encontrado ou erro na requisição.</p>
+}
+
+@code {
+    private int personagemId = 1;
+    private Character? personagem;
+    private bool loading = false;
+    private bool erro = false;
+
+    private async Task BuscarPersonagem()
+    {
+        erro = false;
+        personagem = null;
+        loading = true;
+
+        var result = await DbzService.GetCharacterAsync(personagemId);
+
+        if (result != null)
+            personagem = result;
+        else
+            erro = true;
+
+        loading = false;
+    }
+}
